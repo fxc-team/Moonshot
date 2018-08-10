@@ -1,0 +1,581 @@
+{% extends 'boot/header.twig.html' %}
+<script src="__PUBLIC__/jsoneditor/js/jquery.jsoneditor.js"></script>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/jsoneditor/css/jsoneditor.css"/>
+<style>
+    img{
+        height:50px;
+        width:50px;
+    }
+    .one_question,li{
+        padding: 10px 0; border-bottom: solid 1px #fff0f0;
+    }
+    #config_question .control-label,#special_question .control-label{
+        text-align: left;
+        width: 100px;
+    }
+    #config_question .controls,#special_question .controls{
+        margin-left: 0px;
+    }
+    #config_question .controls div,#special_question .controls div{
+        margin-left: 120px;
+        text-align: left;
+    }
+    #config_question .controls div input,#special_question .controls div input{
+        margin: 10px 0;
+    }
+    .bounding{
+        width: 375px; height: 667px;
+    }
+    .scroll{
+        overflow: scroll;
+    }
+    .light{
+        background-color: #1aad19;
+        color: #fff;
+    }
+    .hide{
+        display:none;
+    }
+    @keyframes fadein{0%{opacity: 0;}100%{opacity: 1;}}
+    @-webkit-keyframes fadein{0%{opacity: 0;}100%{opacity: 1;}}
+    @-moz-keyframes fadein{0%{opacity: 0;}100%{opacity: 1;}}
+    @-o-keyframes fadein{0%{opacity: 0;}100%{opacity: 1;}}
+    @-ms-keyframes fadein{0%{opacity: 0;}100%{opacity: 1;}}
+    .on{
+        animation:fadein 3s linear 1;
+        -webkit-animation:fadein 3s linear 1;
+        -moz-animation:fadein 3s linear 1;
+        -o-animation:fadein 3s linear 1;
+        -ms-animation:fadein 3s linear 1;
+        display: block;
+    }
+    #tabs ul{
+        margin: 0;
+    }
+    #tabs li{
+        padding-left: 20px;
+    }
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap bg">
+    <ul class="nav nav-tabs">
+        <li class="active"><a>{:L('CONFIG')}</a></li>
+        <li><a href="{:U('Business/plugs',array('id'=>$_GET['pid']))}">{$_GET.name}</a></li>
+    </ul>
+    <form action="{:U('Business/config_edit')}" method="post" class="form-horizontal js-ajax-forms" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{$data.id}">
+        <div class="row-fluid">
+            <div class="span12">
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="375px"><iframe src="https://api.client.yazai.com/wxh5/gz/ttdt/#/?actid={$data.id}" class="bounding"  scrolling="No" noresize="noresize" frameborder="0" id="topFrame"></iframe></th>
+                        <td width="375px">
+                            <php>
+                                $data_ = json_decode($data['data'],true);
+                                $list = $data_['answer'];
+                                $all_data = json_encode($data_,true);
+                                $json_list = json_encode($list['question_lists'],true);
+                                $sjson_list = json_encode($list['special'],true);
+                                $ljson_list = json_encode($list['question_line_type'],true);
+                                $ijson_list = json_encode($list['images'],true);
+                                $ajson_list = json_encode($list['createImage']['actions'],true);
+                            </php>
+                            <fieldset class="bounding scroll">
+                                <div><h4>题库列表</h4></div>
+                                <volist name="list.question_lists" id="vo">
+                                    <p class="one_question" onclick="get_question(this,'#config_question')" data-key="{$key}">{$key}：{$vo.question.type}</p>
+                                </volist>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div><h4>特殊题库列表</h4></div>
+                                <volist name="list.special" id="vo">
+                                    <p class="one_question" onclick="get_question(this,'#config_question','s')" data-key="{$key}">{$key}：{$vo.question.type}</p>
+                                </volist>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div onclick="get_other_config_html('#config_question','atvInfo')"><h4>活动详情</h4></div>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div><h4>小程序配置</h4></div>
+                                <volist name="data_.items" id="vo">
+                                    <p class="one_question" onclick="get_items(this,'#config_question')" data-key="{$key}">{$key}：{$vo.type}</p>
+                                </volist>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div onclick="get_other_config_html('#config_question','answer')"><h4>题目配置</h4></div>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div><h4>出题配置</h4></div>
+                                <volist name="list.question_line_type" id="vo">
+                                    <p class="one_question" onclick="get_line_type(this,'#config_question')" data-key="{$key}">{$key}：{$vo}</p>
+                                </volist>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div onclick="get_other_config_html('#config_question','createImage')"><h4>生成图配置</h4></div>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div><h4>生成图操作</h4></div>
+                                <volist name="list.createImage.actions" id="vo">
+                                    <p class="one_question" onclick="get_actions(this,'#config_question')" data-key="{$key}">{$key}：{$vo.type}</p>
+                                </volist>
+                            </fieldset>
+                            <fieldset class="bounding scroll hide">
+                                <div><h4>图片配置</h4></div>
+                                <volist name="list.images" id="vo">
+                                    <p class="one_question" onclick="get_images(this,'#config_question')" data-key="{$key}">{$key}：<img src="{$vo}"></p>
+                                </volist>
+                            </fieldset>
+                            <!--<fieldset class="bounding scroll hide">
+                                <div onclick="get_other_config_html('#config_question','json')"><h4>JSON配置</h4></div>
+                                <div>
+                                    <textarea name="config" style="width: 80%;height: 400px;">{$data.data}</textarea>
+                                </div>
+                            </fieldset>-->
+                        </td>
+                        <td width="375px" style="background-color: 	#E1FFFF">
+                            <div class="bounding scroll">
+                                <div><h4>配置数据</h4></div>
+                                <div id="config_question"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="height: 667px; text-align: left" id="tabs">
+                                <div><h4>配置项</h4></div>
+                                <ul>
+                                    <li class="light">题库</li>
+                                    <li>特殊题库</li>
+                                    <li>活动详情</li>
+                                    <li>小程序配置</li>
+                                    <li>题目配置</li>
+                                    <li>出题配置</li>
+                                    <li>生成图配置</li>
+                                    <li>生成图操作</li>
+                                    <li>图片配置</li>
+                                    <!--<li>JSON配置</li>-->
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div>
+            <textarea name="config" style="width: 80%;height: 400px;">{$data.data}</textarea>
+        </div>
+        <!--<div id="editor" class="json-editor"></div>
+        <pre id="json"></pre>-->
+        <div class="form-actions" style="text-align: center;">
+            <button class="btn btn-primary js-ajax-submit" type="submit">提交</button>
+            <a class="btn" href="{:U('Business/plugs',array('id'=>$_GET['pid']))}">返回</a>
+        </div>
+    </form>
+</div>
+<script src="__PUBLIC__/js/common.js"></script>
+<script src="__PUBLIC__/js/knowledge/question.js"></script>
+<script>
+    window.onload = function() {
+        var oTab = document.getElementById("tabs");
+        var oUl = oTab.getElementsByTagName("ul")[0];
+        var oLis = oUl.getElementsByTagName("li");
+        var oDivs= document.getElementsByTagName("fieldset");
+        for (var i = 0, len = oLis.length; i < len; i++) {
+            oLis[i].index = i;
+            oLis[i].onclick = function () {
+                for (var n = 0; n < len; n++) {
+                    oLis[n].className = "";
+                    oDivs[n].className = "bounding scroll hide";
+                }
+                this.className = "light";
+                oDivs[this.index].className = "bounding scroll on";
+            }
+        }
+    }
+</script>
+<script>
+    var all_data = JSON.parse('{$all_data}');
+    var list = JSON.parse('{$json_list}');
+    var slist = JSON.parse('{$sjson_list}');
+    var llist = JSON.parse('{$ljson_list}');
+    var ilist = JSON.parse('{$ijson_list}');
+    var alist = JSON.parse('{$ajson_list}');
+    var act_id = '{$data.id}';
+    var iframe_src = 'https://api.client.yazai.com/wxh5/gz/ttdt/#/?actid='+act_id;
+
+    /*$('#editor').jsonEditor(all_data, { change: function() {
+        $('#json').html(JSON.stringify(all_data));
+    } });*/
+
+    function rfresh_iframe(index,from_index) {
+        document.getElementById("topFrame").src = iframe_src + '&index='+index+'&from='+from_index;
+        document.getElementById("topFrame").contentWindow.location.reload(true);
+    }
+    function get_question(q,id,qt='q') {
+        $('.one_question').attr('style','color:block');
+        $(q).attr('style','color:#FFB6C1');
+        var index = $(q).data('key');
+        var data = qt == 's'?slist[index]:list[index];
+        var from_index = qt == 's'?1:0;
+        rfresh_iframe(index,from_index);
+        var html_data = get_question_html(data,index,from_index);
+        $(id).html(html_data);
+    }
+    function get_items(q,id) {
+        $('.one_question').attr('style','color:block');
+        $(q).attr('style','color:#FFB6C1');
+        var index = $(q).data('key');
+        var data = all_data['items'][index];
+        var html_data = get_type_items(data,index);
+        $(id).html(html_data);
+    }
+    function get_line_type(q,id) {
+        $('.one_question').attr('style','color:block');
+        $(q).attr('style','color:#FFB6C1');
+        var index = $(q).data('key');
+        var data = llist[index];
+        var html_data = get_type_question_line_type(data,index);
+        $(id).html(html_data);
+    }
+    function get_images(q,id) {
+        $('.one_question').attr('style','color:block');
+        $(q).attr('style','color:#FFB6C1');
+        var index = $(q).data('key');
+        var data = ilist[index];
+        var html_data = get_type_images(data,index);
+        $(id).html(html_data);
+    }
+    function get_actions(q,id) {
+        $('.one_question').attr('style','color:block');
+        $(q).attr('style','color:#FFB6C1');
+        var index = $(q).data('key');
+        var data = alist[index];
+        var html_data = get_type_actions(data,index);
+        $(id).html(html_data);
+    }
+    function get_question_html(data,index,from_index) {
+        var question_type = data['question']['type'];
+        return get_question_type_html(data,index,question_type,from_index);
+    }
+    function get_question_type_html(data,index,type,from_index) {
+        switch(type)
+        {
+            case 'text':
+                return get_type_text(data,index,from_index);
+                break;
+            case 'image':
+                return get_type_image(data,index,from_index);
+                break;
+            case 'audio':
+                return get_type_audio(data,index,from_index);
+                break;
+            case 'video':
+                return get_type_video(data,index,from_index);
+                break;
+            case 'input':
+                return get_type_input(data,index,from_index);
+                break;
+            case 'pay':
+                return get_type_pay(data,index,from_index);
+                break;
+            case 'address':
+                return get_type_address(data,index,from_index);
+                break;
+            case 'videoShow':
+                return get_type_videoShow(data,index,from_index);
+                break;
+            default:
+                return '';
+        }
+    }
+    function get_other_config_html(id,type) {
+        var html_data = get_other_config(all_data,type);
+        $(id).html(html_data);
+    }
+    function get_other_config(data,type) {
+        switch(type)
+        {
+            case 'atvInfo':
+                return get_type_atvInfo(data);
+                break;
+            case 'answer':
+                return get_type_answer(data);
+                break;
+            case 'createImage':
+                return get_type_createImage(data);
+                break;
+            case 'json':
+                return get_type_json(data);
+                break;
+            default:
+                return '';
+        }
+    }
+    //文本类型
+    function get_type_text(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var options_html = '';
+        var all_options_html = '';
+        for(var j = 0,len = lists.length; j < len; j++){
+            var option = lists[j]['text'];
+            var selected = (right.indexOf(j) == -1)?'':'selected';
+            options_html = options_html+'<option class="relevance'+j+'" value="'+option+'" '+selected+' ondblclick ="remove_self(this);">'+option+'</option>';
+            all_options_html = all_options_html+'<input class="relevance'+j+'" name="all_options[]" value="'+option+'" type="hidden"/>';
+        }
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">选项及答案</label><div id="all_options">'+all_options_html+'</div><div class="controls"><select multiple="multiple" style="max-height: 100px;" name="options[]" id="select_data">'+options_html+'</select><div><input placeholder="输入选项，点击按钮添加" id="one_option"/><a class="btn" id="add_option" onclick="addOption();">添加选项</a></div><div class="form-required">windows：按住 Ctrl 按钮来选择多个选项,Mac：按住 command 按钮来选择多个选项。双击选项可删除</div></div></div>';
+        return html_data;
+    }
+    //图片类型
+    function get_type_image(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_src = data['question']['src'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var options_html = '';
+        var all_options_html = '';
+        for(var j = 0,len = lists.length; j < len; j++){
+            var option = lists[j]['text'];
+            var selected = (right.indexOf(j) == -1)?'':'selected';
+            options_html = options_html+'<option class="relevance'+j+'" value="'+option+'" '+selected+' ondblclick ="remove_self(this);">'+option+'</option>';
+            all_options_html = all_options_html+'<input class="relevance'+j+'" name="all_options[]" value="'+option+'" type="hidden"/>';
+        }
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目图片</label><div class="controls"><input type="text" name="src" value="'+question_src+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">选项及答案</label><div id="all_options">'+all_options_html+'</div><div class="controls"><select multiple="multiple" style="max-height: 100px;" name="options[]" id="select_data">'+options_html+'</select><div><input placeholder="输入选项，点击按钮添加" id="one_option"/><a class="btn" id="add_option" onclick="addOption();">添加选项</a></div><div class="form-required">windows：按住 Ctrl 按钮来选择多个选项,Mac：按住 command 按钮来选择多个选项。双击选项可删除</div></div></div>';
+        return html_data;
+    }
+    //音频类型
+    function get_type_audio(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_src = data['question']['src'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var options_html = '';
+        var all_options_html = '';
+        for(var j = 0,len = lists.length; j < len; j++){
+            var option = lists[j]['text'];
+            var selected = (right.indexOf(j) == -1)?'':'selected';
+            options_html = options_html+'<option class="relevance'+j+'" value="'+option+'" '+selected+' ondblclick ="remove_self(this);">'+option+'</option>';
+            all_options_html = all_options_html+'<input class="relevance'+j+'" name="all_options[]" value="'+option+'" type="hidden"/>';
+        }
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目语音</label><div class="controls"><input type="text" name="src" value="'+question_src+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">选项及答案</label><div id="all_options">'+all_options_html+'</div><div class="controls"><select multiple="multiple" style="max-height: 100px;" name="options[]" id="select_data">'+options_html+'</select><div><input placeholder="输入选项，点击按钮添加" id="one_option"/><a class="btn" id="add_option" onclick="addOption();">添加选项</a></div><div class="form-required">windows：按住 Ctrl 按钮来选择多个选项,Mac：按住 command 按钮来选择多个选项。双击选项可删除</div></div></div>';
+        return html_data;
+    }
+    //视频类型
+    function get_type_video(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_src = data['question']['src'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var options_html = '';
+        var all_options_html = '';
+        for(var j = 0,len = lists.length; j < len; j++){
+            var option = lists[j]['text'];
+            var selected = (right.indexOf(j) == -1)?'':'selected';
+            options_html = options_html+'<option class="relevance'+j+'" value="'+option+'" '+selected+' ondblclick ="remove_self(this);">'+option+'</option>';
+            all_options_html = all_options_html+'<input class="relevance'+j+'" name="all_options[]" value="'+option+'" type="hidden"/>';
+        }
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目视频</label><div class="controls"><input type="text" name="src" value="'+question_src+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">选项及答案</label><div id="all_options">'+all_options_html+'</div><div class="controls"><select multiple="multiple" style="max-height: 100px;" name="options[]" id="select_data">'+options_html+'</select><div><input placeholder="输入选项，点击按钮添加" id="one_option"/><a class="btn" id="add_option" onclick="addOption();">添加选项</a></div><div class="form-required">windows：按住 Ctrl 按钮来选择多个选项,Mac：按住 command 按钮来选择多个选项。双击选项可删除</div></div></div>';
+        return html_data;
+    }
+    //输入框类型
+    function get_type_input(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_inputType = data['question']['inputType'];
+        var question_required = data['question']['required'];
+        var question_placeholder = data['question']['placeholder'];
+        var question_maxlength = data['question']['maxlength'];
+        var question_tips = data['question']['tips'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">输入框类型</label><div class="controls"><input type="text" name="inputType" value="'+question_inputType+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">是否必须</label><div class="controls"><input type="text" name="required" value="'+question_required+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">提示</label><div class="controls"><input type="text" name="placeholder" value="'+question_placeholder+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">最大长度</label><div class="controls"><input type="text" name="maxlength" value="'+question_maxlength+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">小提示</label><div class="controls"><input type="text" name="tips" value="'+question_tips+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //支付
+    function get_type_pay(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_price = data['question']['price'];
+        var question_tips = data['question']['tips'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/><input type="hidden" name="form" value="'+from_index+'"/><div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">价格</label><div class="controls"><input type="text" name="price" value="'+question_price+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">提示</label><div class="controls"><input type="text" name="tips" value="'+question_tips+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">题目</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div><div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //地址
+    function get_type_address(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_text = data['question']['text'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/>' +
+            '<input type="hidden" name="form" value="'+from_index+'"/>' +
+            '<div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">地址</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //视频展示
+    function get_type_videoShow(data,index,from_index) {
+        var time = data['time'];
+        var question_type = data['question']['type'];
+        var question_text = data['question']['text'];
+        var question_src = data['question']['src'];
+        var answers_type = data['answers']['type'];
+        var lists = data['answers']['lists'];
+        var right = data['right'];
+        var html_data = '<input type="hidden" name="config_type" value="question"/><input type="hidden" name="index" value="'+index+'"/>' +
+            '<input type="hidden" name="form" value="'+from_index+'"/>' +
+            '<div class="control-group"><label class="control-label">时间</label><div class="controls"><input type="text" name="time" value="'+time+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label" style="text-align: left;">题目类型</label><div class="controls"><input type="text" name="question_type" value="'+question_type+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">视频展示</label><div class="controls"><input type="text" name="question_text" value="'+question_text+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">视频地址</label><div class="controls"><input type="text" name="src" value="'+question_src+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">答案类型</label><div class="controls"><input type="text" name="answers_type" value="'+answers_type+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //活动详情
+    function get_type_atvInfo(data) {
+        var atvInfo = data['atvInfo'];
+        var bg_src = atvInfo['bg']['src'];
+        var share_title = atvInfo['share']['title'];
+        var share_path = atvInfo['share']['path'];
+        var share_image = atvInfo['share']['image'];
+        var navigation_title = atvInfo['navigation']['title'];
+        var navigation_fontColor = atvInfo['navigation']['fontColor'];
+        var navigation_background = atvInfo['navigation']['background'];
+        var html_data = '<input type="hidden" name="config_type" value="atvInfo"/><div class="control-group"><label class="control-label">背景</label><div class="controls"><input type="text" name="bg_src" value="'+bg_src+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享标题</label><div class="controls"><input type="text" name="share_title" value="'+share_title+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享链接</label><div class="controls"><input type="text" name="share_path" value="'+share_path+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享图片</label><div class="controls"><input type="text" name="share_image" value="'+share_image+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">页面标题</label><div class="controls"><input type="text" name="navigation_title" value="'+navigation_title+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">颜色</label><div class="controls"><input type="text" name="navigation_fontColor" value="'+navigation_fontColor+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">背景色</label><div class="controls"><input type="text" name="navigation_background" value="'+navigation_background+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //活动详情
+    function get_type_items(data,index) {
+        var html_data = '<input type="hidden" name="config_type" value="items"/><input type="hidden" name="items_index" value="'+index+'"/>' +
+            '<div class="control-group"><label class="control-label">类型</label><div class="controls"><input type="text" name="items_type" value="'+data.type+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">路径</label><div class="controls"><input type="text" name="items_src" value="'+data.src+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">W</label><div class="controls"><input type="text" name="items_w" value="'+data.W+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">H</label><div class="controls"><input type="text" name="items_h" value="'+data.H+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">T</label><div class="controls"><input type="text" name="items_t" value="'+data.T+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">L</label><div class="controls"><input type="text" name="items_l" value="'+data.L+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">S</label><div class="controls"><input type="text" name="items_s" value="'+data.S+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">C</label><div class="controls"><input type="text" name="items_c" value="'+data.C+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">W</label><div class="controls"><input type="text" name="items_w" value="'+data.W+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">M</label><div class="controls"><input type="text" name="items_m" value="'+data.M+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">R</label><div class="controls"><input type="text" name="items_r" value="'+data.R+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //题目配置
+    function get_type_answer(data) {
+        var answer = data['answer'];
+        var answer_title = answer['title'];
+        var answer_bg = answer['bg'];
+        var answer_logo = answer['logo'];
+        var answer_logos = answer['logos'];
+        var answer_ad_time = answer['ad']['time'];
+        var answer_ad_image = answer['ad']['image'];
+        var html_data = '<input type="hidden" name="config_type" value="answer"/><div class="control-group"><label class="control-label">标题</label><div class="controls"><input type="text" name="answer_title" value="'+answer_title+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">背景</label><div class="controls"><input type="text" name="answer_bg" value="'+answer_bg+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">图标1</label><div class="controls"><input type="text" name="answer_logo" value="'+answer_logo+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">图标2</label><div class="controls"><input type="text" name="answer_logos" value="'+answer_logos+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">广告时间</label><div class="controls"><input type="text" name="answer_ad_time" value="'+answer_ad_time+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">广告图</label><div class="controls"><input type="text" name="answer_ad_image" value="'+answer_ad_image+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //出题配置
+    function get_type_question_line_type(data,index) {
+        var html_data = '<input type="hidden" name="config_type" value="question_line_type"/><input type="hidden" name="line_type_index" value="'+index+'"/>' +
+            '<div class="control-group"><label class="control-label">类型</label><div class="controls"><input type="text" name="line_type_type" value="'+data+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //生成图配置
+    function get_type_createImage(data) {
+        var createImage = data['answer']['createImage'];
+        var createImage_scaleRate = createImage['scaleRate'];
+        var createImage_width = createImage['width'];
+        var createImage_height = createImage['height'];
+        var createImage_fileType = createImage['fileType'];
+        var createImage_bg = createImage['bg'];
+        var createImage_path = createImage['path'];
+        var createImage_btnsS = createImage['btnsS'];
+        var createImage_style_a = createImage['style']['a'];
+        var createImage_style_b = createImage['style']['b'];
+        var createImage_style_c = createImage['style']['c'];
+        var createImage_state_style = createImage['state']['style'];
+        var createImage_tip_style = createImage['tip']['style'];
+        var createImage_share_style_a = createImage['share']['style']['a'];
+        var createImage_share_title = createImage['share']['title'];
+        var createImage_share_path = createImage['share']['path'];
+        var createImage_btns_type = createImage['btns'][0]['type'];
+        var createImage_btns_content = createImage['btns'][0]['content'];
+        var createImage_btns_S = createImage['btns'][0]['S'];
+        var html_data = '<input type="hidden" name="config_type" value="createImage"/><div class="control-group"><label class="control-label">比率</label><div class="controls"><input type="text" name="createImage_scaleRate" value="'+createImage_scaleRate+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">宽</label><div class="controls"><input type="text" name="createImage_width" value="'+createImage_width+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">高</label><div class="controls"><input type="text" name="createImage_height" value="'+createImage_height+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">文件类型</label><div class="controls"><input type="text" name="createImage_fileType" value="'+createImage_fileType+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">背景</label><div class="controls"><input type="text" name="createImage_bg" value="'+createImage_bg+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">路径</label><div class="controls"><input type="text" name="createImage_path" value="'+createImage_path+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">按钮样式</label><div class="controls"><input type="text" name="createImage_btnsS" value="'+createImage_btnsS+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">样式a</label><div class="controls"><input type="text" name="createImage_style_a" value="'+createImage_style_a+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">样式b</label><div class="controls"><input type="text" name="createImage_style_b" value="'+createImage_style_b+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">样式c</label><div class="controls"><input type="text" name="createImage_style_c" value="'+createImage_style_c+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">状态样式</label><div class="controls"><input type="text" name="createImage_state_style" value="'+createImage_state_style+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">提示样式</label><div class="controls"><input type="text" name="createImage_tip_style" value="'+createImage_tip_style+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享样式a</label><div class="controls"><input type="text" name="createImage_share_style_a" value="'+createImage_share_style_a+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享标题</label><div class="controls"><input type="text" name="createImage_share_title" value="'+createImage_share_title+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">分享路径</label><div class="controls"><input type="text" name="createImage_share_path" value="'+createImage_share_path+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">按钮类型</label><div class="controls"><input type="text" name="createImage_btns_type" value="'+createImage_btns_type+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">按钮文字</label><div class="controls"><input type="text" name="createImage_btns_content" value="'+createImage_btns_content+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">按钮样式</label><div class="controls"><input type="text" name="createImage_btns_S" value="'+createImage_btns_S+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //生成图操作
+    function get_type_actions(data,index) {
+        var html_data = '<input type="hidden" name="config_type" value="actions"/><input type="hidden" name="actions_index" value="'+index+'"/>' +
+            '<div class="control-group"><label class="control-label">类型</label><div class="controls"><input type="text" name="actions_type" value="'+data.type+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">路径</label><div class="controls"><input type="text" name="actions_url" value="'+data.url+'" style="width: 160px;"></div></div>' +
+            '<div class="control-group"><label class="control-label">x</label><div class="controls"><input type="text" name="actions_x" value="'+data.x+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">y</label><div class="controls"><input type="text" name="actions_y" value="'+data.y+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">宽</label><div class="controls"><input type="text" name="actions_width" value="'+data.width+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">高</label><div class="controls"><input type="text" name="actions_height" value="'+data.height+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">颜色</label><div class="controls"><input type="text" name="actions_color" value="'+data.color+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">大小值</label><div class="controls"><input type="text" name="actions_size" value="'+data.size+'" style="width: 160px;"></div></div>'+
+            '<div class="control-group"><label class="control-label">位置</label><div class="controls"><input type="text" name="actions_align" value="'+data.align+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //图片配置
+    function get_type_images(data,index) {
+        var html_data = '<input type="hidden" name="config_type" value="images"/><input type="hidden" name="images_index" value="'+index+'"/>' +
+            '<div class="control-group"><label class="control-label">图片路径</label><div class="controls"><input type="text" name="images_src" value="'+data+'" style="width: 160px;"></div></div>';
+        return html_data;
+    }
+    //json配置
+    function get_type_json(data) {
+        var html_data = '<input type="hidden" name="config_type" value="json"/>';
+        return html_data;
+    }
+</script>
+</body>
+</html>

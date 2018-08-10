@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <base>
+        <title>活动配置</title>
+        <name>activity</name>
+        <desc><![CDATA[活动配置插件]]></desc>
+        <category>default</category>
+        <version>1.0</version>
+        <author>fxc</author>
+        <time>2018-07-10</time>
+        <icon>icon.png</icon>
+    </base>
+    <menus>
+        <item>
+            <name>活动配置</name>
+            <action>index</action>
+            <submenu>
+                <item>
+                    <name>活动列表</name>
+                    <action>lists</action>
+                </item>
+                <item>
+                    <name>活动配置</name>
+                    <action>config</action>
+                </item>
+                <item>
+                    <name>日志管理</name>
+                    <action>log</action>
+                </item>
+            </submenu>
+        </item>
+    </menus>
+    <install>
+        <table>
+            <![CDATA[
+            CREATE TABLE IF NOT EXISTS `ng_business_plug` (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '业务id',
+              `name` varchar(20) NOT NULL COMMENT '业务名称',
+              `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '状态0关闭，1开启',
+              `data` text NOT NULL COMMENT '配置信息',
+              `ctime` int(10) unsigned NOT NULL COMMENT '创建时间',
+              `mtime` int(10) unsigned NOT NULL COMMENT '修改时间',
+              `bid` bigint(20) unsigned NOT NULL COMMENT '小b商家的id',
+              `pid` bigint(20) unsigned NOT NULL COMMENT '插件id',
+              `mix_id` varchar(100) NOT NULL COMMENT '活动标识：运营者id_商家id_插件id_活动自己id',
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='小b商家与插件关系表';
+        ]]>
+        </table>
+        <table>
+            <![CDATA[
+            CREATE TABLE IF NOT EXISTS `ng_knowledge_repo` (
+              `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+              `type` char(2) DEFAULT '0' COMMENT '类型',
+              `cate` char(2) DEFAULT '0' COMMENT '分类0未分配',
+              `sub_cate` char(2) DEFAULT '0' COMMENT '子分类',
+              `question` varchar(255) NOT NULL COMMENT '题目',
+              `ans_options` text COMMENT '题目附加,json格式',
+              `question_ext` text COMMENT '题目扩展',
+              `answer` varchar(255) NOT NULL COMMENT '答案，json格式',
+              `ans_explain` varchar(255) DEFAULT NULL COMMENT '答案解释',
+              `author` varchar(64) DEFAULT NULL COMMENT '作者',
+              `mtime` int(11) DEFAULT '0' COMMENT '修改时间',
+              `ctime` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+              `level` int(2) NOT NULL DEFAULT '0' COMMENT '题目难度等级',
+              `level_name` varchar(20) NOT NULL COMMENT '等级名称',
+              `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态0删除1正常',
+              `private` tinyint(1) NOT NULL DEFAULT '0' COMMENT '题目是否固定0否，1是',
+              PRIMARY KEY (`id`),
+              KEY `idx_cate` (`cate`,`sub_cate`),
+              KEY `idx_author` (`author`),
+              KEY `idx_type` (`type`),
+              KEY `level` (`level`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='活动题库表';
+        ]]>
+        </table>
+        <init>
+            <![CDATA[
+
+            ]]>
+        </init>
+    </install>
+    <upgrade>
+
+    </upgrade>
+</root>
